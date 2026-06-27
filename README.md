@@ -33,22 +33,6 @@ TUIs like **Claude Code** depend on precise column counting. When a terminal mis
 
 ---
 
-## Requirements – JCEF
-
-TermGlyph needs **JCEF (Chromium Embedded)**. It is declared as an **optional** dependency, so the plugin installs on every IDE. If JCEF is missing, the tool window shows a "JCEF Required" banner with instructions.
-
-| IDE | JCEF | How to get it |
-|-----|------|---------------|
-| IntelliJ IDEA **Ultimate** | ✅ Built‑in | Works out of the box |
-| WebStorm / PyCharm Pro / Rider / other pro IDEs | ✅ Built‑in | Works out of the box |
-| IntelliJ IDEA **Community** | ❌ Not available | Cannot run |
-| Android Studio **2026.1.1+** (Quail 1) | ⚙️ Via plugin | Install **"Web Browser (JCEF)"** from Marketplace |
-| Android Studio **2026.2+** (planned) | ✅ Built‑in | Nothing extra needed |
-
-Minimum IDE: **2025.3**.
-
----
-
 ## Usage
 
 | Action | Shortcut |
