@@ -1,51 +1,37 @@
 # TermGlyph
 
-<p align="center"><img src="src/main/resources/pluginIcon.svg" width="120" alt="TermGlyph"></p>
+<p align="center"><img src="src/main/resources/icons/term-glyph.svg" width="120" alt="TermGlyph"></p>
 
-<p align="center"><b>A terminal tool window for IntelliJ-based IDEs that renders Claude Code cleanly — no overlapping, hard-to-read text — and handles complex scripts (Thai, emoji) correctly.</b></p>
+<p align="center"><b>An alternative terminal for IntelliJ-based IDEs — xterm.js with Unicode 11,<br>so TUI tools like Claude Code render cleanly without overlapping text or broken layouts.</b></p>
 
 <p align="center">Runs on <b>macOS</b> and <b>Windows</b>.</p>
 
-<p align="center"><img src="docs/images/screenshot.png" width="720" alt="TermGlyph screenshot — Claude Code in a terminal tab with Thai text and emoji"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/duckyman-ai/termglyph/main/docs/images/screenshot.png" width="720" alt="TermGlyph screenshot"></p>
 
-TermGlyph is an **alternative terminal** that runs [xterm.js](https://xtermjs.org/) 6 (with **Unicode 11**) inside the IDE's JCEF (Chromium Embedded) browser. xterm.js handles terminal columns precisely, so tools like **Claude Code** — whose input box, borders, and dense output can otherwise overlap and become hard to read — display cleanly. It also composes combining and wide characters correctly.
+TermGlyph embeds [xterm.js](https://xtermjs.org/) 6 inside the IDE's JCEF (Chromium Embedded) browser, giving you a **fast, column‑precise terminal** that sits alongside the built‑in one. Its Unicode 11 support means combining characters, wide glyphs, and emoji all get the correct column width — no overlapping text, no broken box‑drawing, no tofu.
 
-> TermGlyph is a *companion* option — the IDE's built-in terminal stays fully available. Use whichever fits the task.
+> TermGlyph is a *companion* to the IDE's built‑in terminal. Use whichever fits the task.
 
 ---
 
 ## Why
 
-The input box, borders, and dense output of TUIs like **Claude Code** rely on precise terminal column handling. When a terminal counts columns wrong (e.g. treating a combining character as a full column), the layout drifts — text overlaps, boxes break, and it gets hard to read. TermGlyph uses xterm.js with Unicode 11, which gets column widths right, so Claude Code and other TUIs render cleanly.
+TUIs like **Claude Code** depend on precise column counting. When a terminal miscounts a character's width, layouts drift: text overlaps, borders break, and the UI becomes hard to read. TermGlyph runs xterm.js with Unicode 11, which gets column widths right for every script — Latin, CJK, Arabic, Thai, emoji — so **any TUI renders the way it was designed to**.
 
-It also fixes combining and wide characters — Thai vowels/tone marks (◌ั ◌้ ◌่), emoji, CJK — they compose with correct spacing.
+---
 
 ## Features
 
-- ✅ **Clean rendering** — Claude Code's input box/borders and dense output display without overlapping; Thai/emoji/wide chars compose correctly (xterm.js Unicode 11).
-- 🗂 **Multiple tabs + native side-by-side split** — Split Right / Split Down / Change Orientation / Unsplit, exactly like the IDE's own terminal.
-- 🔍 **Find** (Cmd/Ctrl+F) — navigate matches; the active match is highlighted.
-- 📋 **Copy / Paste / Clear** — native right-click menu.
-- 🏷 **Tab icons & titles follow the running process** — e.g. "Claude Code" with its icon while claude runs.
-- 🎨 **Follows your IDE theme** — background/foreground from the editor color scheme; the 16 ANSI colours come from *Editor › Color Scheme › Console Colors*. Truecolor (`COLORTERM=truecolor`) is advertised so tools like `starship`/`bat`/`eza` are vivid.
-- ⚡ **Fast** — WebGL renderer (auto-falls back to DOM), output batching, anti-freeze repaints.
-- 🪟 **Settings** — *Settings → Tools → TermGlyph* for font/shell/scrollback/cursor.
+- ✅ **Clean TUI rendering** — Claude Code's input box, borders, and dense output display without overlapping. Works for any terminal UI that depends on accurate column widths.
+- 🗂 **Tabs + native split** — Multiple switchable tabs, plus **Split Right / Split Down / Unsplit** in the tab's right‑click menu, exactly like the IDE's own terminal.
+- 🔍 **Find** — `Cmd+F` / `Ctrl+F` with match navigation and active‑match highlight.
+- 📋 **Copy, paste, clear** — native right‑click context menu.
+- 🏷 **Dynamic tab icons & titles** — the tab follows the running process (Claude Code, Git, Docker, Node.js, Gradle, …). The terminal's OSC title sequence is also honoured.
+- 🎨 **Follows your IDE editor theme** — background, foreground, cursor, and selection colours come from the editor colour scheme. ANSI 16‑colour palette from *Editor → Color Scheme → Console Colors*. Truecolor (`COLORTERM=truecolor`) is advertised.
+- ⚡ **Fast** — WebGL renderer with automatic DOM fallback, output batching, and anti‑freeze repaints.
+- 🪟 **Settings** — *Settings → Tools → TermGlyph*: font family, font size, line height, shell, scrollback, cursor style.
 
-## Requirements — JCEF
-
-TermGlyph renders through **JCEF (Chromium Embedded)**, which is bundled with some IDEs and installable on others. It's declared as an **optional** dependency, so it installs everywhere; if JCEF is unavailable the tool window shows a "JCEF Required" banner with install instructions instead of the terminal.
-
-| IDE | JCEF | How to get it |
-|-----|------|---------------|
-| IntelliJ IDEA **Ultimate** | ✅ Built-in | Works out of the box |
-| WebStorm / PyCharm Pro / Rider / other pro IDEs | ✅ Built-in | Works out of the box |
-| IntelliJ IDEA **Community** | ❌ Not available | Cannot run (no JCEF for Community) |
-| Android Studio **2026.1.1+** (Quail 1) | ⚙️ Via plugin | Install **"Web Browser (JCEF)"** from Marketplace |
-| Android Studio **2026.2+** (planned) | ✅ Built-in | Nothing extra needed |
-
-`JBCefApp.isSupported()` is the single runtime gate — it's checked before any JCEF API is touched.
-
-Minimum IDE: **2025.3** (the native split API + build target).
+---
 
 ## Usage
 
@@ -53,42 +39,38 @@ Minimum IDE: **2025.3** (the native split API + build target).
 |--------|----------|
 | New terminal tab | **+** beside the tabs |
 | Close tab | **×** on the tab |
-| Split right / down | right-click the tab → **Split Right / Split Down** |
-| Find | **Cmd+F** (mac) / **Ctrl+F** |
-| Copy | **Cmd+C** (mac) / **Ctrl+Shift+C** |
-| Paste | right-click → **Paste** |
-| Clear screen | **Cmd+K** (mac) / **Ctrl+K** |
-| Send Ctrl+C (SIGINT) | **Ctrl+C** |
-| New line (multi-line input) | **Shift+Enter** (e.g. Claude Code) |
-| Settings | gear (⋮) menu → **Settings…** |
+| Split right / split down | right‑click the tab → **Split Right / Split Down** |
+| Find | **Cmd+F** (macOS) / **Ctrl+F** |
+| Copy | **Cmd+C** (macOS) / **Ctrl+Shift+C** |
+| Paste | right‑click → **Paste** |
+| Clear screen | **Cmd+K** (macOS) / **Ctrl+K** |
+| Send SIGINT | **Ctrl+C** |
+| New line (multi‑line TUI input) | **Shift+Enter** |
+| Settings | gear (⋮) → **Settings…** |
 
-Each terminal opens at the **project folder**. The tab's icon/title follows the running process (e.g. Claude Code).
+Each terminal opens at the **project folder**.
 
-## Thai rendering test
-
-After installing, run:
-
-```bash
-echo "สวัสดี ทดสอบสระบน: กั กิ กี กุ กู เก แก"
-echo "ทดสอบวรรณยุกต์: ก่ ก้ ก๊ ก๋"
-echo "ทดสอบซ้อน: เก้า แก้ไข ใช้งาน"
-```
-
-If these render with no extra spacing → it's working. ✅
+---
 
 ## Limitations
 
-- **Remote Development / JetBrains Gateway / SSH / dev-containers:** **not supported** — TermGlyph is **desktop-only**. Its terminal UI (xterm.js in JCEF) is a heavyweight component that renders only on the local machine, so it can't be sent over the Remote Development frontend/backend link. Use the IDE's built-in terminal for remote sessions.
+- **Remote Development / JetBrains Gateway / SSH / dev‑containers**: not supported — TermGlyph is **desktop‑only**. Its terminal (xterm.js in JCEF) is a heavyweight component that renders locally and cannot be forwarded over the Remote Development link. Use the IDE's built‑in terminal for remote sessions.
+
+---
 
 ## For plugin developers
 
-Built with the [IntelliJ Platform Gradle Plugin 2.x](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) on Gradle 9, Kotlin 2.4, JBR 17 toolchain. The 16-colour palette is sourced from `ConsoleHighlighter`. See [`docs/USAGE.md`](docs/USAGE.md) for the full usage guide.
+Built with the [IntelliJ Platform Gradle Plugin 2.x](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) on Gradle 9, Kotlin 2.4, JBR 17 toolchain.
 
-Marketplace payment rules (for reference, this plugin is **free**): [How plugin developers are paid](https://plugins.jetbrains.com/docs/marketplace/getting-paid.html).
+Marketplace payment rules (for reference; this plugin is **free**): [How plugin developers are paid](https://plugins.jetbrains.com/docs/marketplace/getting-paid.html).
 
-## Third-party assets
+---
 
-- **[xterm.js](https://xtermjs.org/)** + addons (fit, unicode11, webgl) — the terminal renderer.
+## Third‑party assets
+
+- **[xterm.js](https://xtermjs.org/)** + addons (fit, unicode11, webgl) — the terminal renderer, MIT‑licensed.
+
+---
 
 ## License
 
