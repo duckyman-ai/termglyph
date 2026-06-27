@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.DefaultActionGroup
+import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.options.ShowSettingsUtil
 import com.intellij.openapi.project.DumbAware
@@ -85,7 +86,7 @@ class TermGlyphTerminalFactory : ToolWindowFactory, DumbAware {
                     // open one via the "+" button, and the tab-close itself completes cleanly.
                     ApplicationManager.getApplication().invokeLater {
                         if (project.isDisposed) return@invokeLater
-                        runCatching { createTerminalContent(toolWindow, project) }
+                        runCatching { createTerminalContent(toolWindow.contentManager, toolWindow, project) }
                     }
                 }
             }
@@ -105,7 +106,7 @@ class TermGlyphTerminalFactory : ToolWindowFactory, DumbAware {
             override fun windowActivated(e: WindowEvent) = refreshSelected(toolWindow)
         })
 
-        createTerminalContent(toolWindow, project)
+        createTerminalContent(toolWindow.contentManager, toolWindow, project)
     }
 
     /** Show a banner when JCEF is missing (Android Studio / Community Edition without the JCEF plugin). */
@@ -127,23 +128,25 @@ class TermGlyphTerminalFactory : ToolWindowFactory, DumbAware {
         toolWindow.contentManager.addContent(content)
     }
 
-    /** Opens a new terminal as a **switchable tab** in the contentManager and selects it (the IDE renders the tab strip). */
-    private fun createTerminalContent(toolWindow: ToolWindow, project: Project) {
+    /** Opens a new terminal as a **switchable tab** in the given [contentManager] and selects it
+     *  (the IDE renders the tab strip).  When called from the tool-window "+", [contentManager] is
+     *  the one currently focused (from `PlatformDataKeys.TOOL_WINDOW_CONTENT_MANAGER`), so a "+" click
+     *  inside a split cell adds a terminal to that cell's tab strip, not the top-level one. */
+    private fun createTerminalContent(contentManager: com.intellij.ui.content.ContentManager, toolWindow: ToolWindow, project: Project) {
         // Initial CWD = the project folder; Light projects without a base path → fall back to the user's home
         val workDir = project.basePath ?: System.getProperty("user.home")
         val content = TermGlyphContent.createContent(project, toolWindow.disposable, workDir)
         // Wire the context-menu "New Tab" / "Close Tab" actions (the factory owns the tool window; the panel doesn't).
         content.getUserData(TermGlyphContent.PANEL_KEY)?.let { panel ->
-            panel.onNewTab = { createTerminalContent(toolWindow, project) }
+            panel.onNewTab = { createTerminalContent(contentManager, toolWindow, project) }
             panel.onCloseTab = {
                 ApplicationManager.getApplication().invokeLater {
-                    if (!project.isDisposed) toolWindow.contentManager.removeContent(content, true)
+                    if (!project.isDisposed) contentManager.removeContent(content, true)
                 }
             }
         }
-        val cm = toolWindow.contentManager
-        cm.addContent(content)
-        cm.setSelectedContent(content)
+        contentManager.addContent(content)
+        contentManager.setSelectedContent(content)
 
         // Force a layout pass on the next turn — JCEF components (heavyweight) sometimes don't get their full size until a
         // resize event fires, which makes xterm fit to an overly narrow size on first open; revalidate immediately to get the real size
@@ -216,11 +219,20 @@ class TermGlyphTerminalFactory : ToolWindowFactory, DumbAware {
     @Suppress("OVERRIDE_DEPRECATION")
     override fun isApplicable(project: Project): Boolean = true
 
-    /** The "+" beside the tabs → opens a new terminal TAB (switchable), like the built-in terminal. */
+    /** The "+" beside the tabs → opens a new terminal TAB (switchable), like the built-in terminal.
+     *  Uses the focused `ContentManager` from the `AnActionEvent` data context, so when the tool window
+     *  is SPLIT into multiple panes the "+" adds a new terminal to the pane the user actually clicked in
+     *  (each split cell has its own `ContentManager`). Falls back to the tool-window-wide CM. */
     private inner class NewTerminalAction(val toolWindow: ToolWindow, val project: Project) :
         AnAction("New Terminal", "Open a new TermGlyph terminal tab", AllIcons.General.Add) {
 
-        override fun actionPerformed(e: AnActionEvent) = createTerminalContent(toolWindow, project)
+        override fun actionPerformed(e: AnActionEvent) {
+            // Use the focused CM from the data context — in a split this returns the *cell's* CM,
+            // not the tool-window-global one. Falls back to the global CM if no context is available.
+            val cm = e.getData(PlatformDataKeys.TOOL_WINDOW_CONTENT_MANAGER)
+                ?: toolWindow.contentManager
+            createTerminalContent(cm, toolWindow, project)
+        }
         override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.EDT
     }
 
