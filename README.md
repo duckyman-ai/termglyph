@@ -2,7 +2,7 @@
 
 <p align="center"><img src="src/main/resources/icons/term-glyph.svg" width="120" alt="TermGlyph"></p>
 
-<p align="center"><b>An alternative terminal for IntelliJ-based IDEs — xterm.js with Unicode 11,<br>so TUI tools like Claude Code render cleanly without overlapping text or broken layouts.</b></p>
+<p align="center"><b>Alternative terminal for JetBrains IDEs — xterm.js with Unicode 11, so TUI tools like Claude Code render cleanly without overlapping text or broken layouts.</b></p>
 
 <p align="center">Runs on <b>macOS</b> and <b>Windows</b>.</p>
 
